@@ -1,0 +1,2 @@
+# BTClib
+Python Bitcoin Library
