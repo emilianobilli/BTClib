@@ -19,8 +19,43 @@ B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 class btckeys(object):
     def __init__(self, pk=None):
-	self.private_key = pk
+	if pk is not None:
+	    if type(pk).__name__ == 'str':
+		if len(pk) < 64:
+		    self.private_key = self.__class__.complete_hex_str(pk)
+		else:
+		    if self.__class__.is_valid(pk):
+			self.private_key = pk
+		    else:
+			# Too long
+			pass
+	    else:
+		pass
+
 	self.public_key  = None
+    
+    @staticmethod
+    def complete_hex_str(pk):
+	i = 64 - len(pk)
+	p = ''
+	while i > 0:
+	    p = p + '0'
+	    i = i - 1
+	return p + pk
+
+    @classmethod
+    def from_integer(cls, i):
+	if type(i).__name__ == 'int' or type(i).__name__ == 'long':
+	    pkstr = hex(i)[2:]
+	    if pkstr.endswith('L'):
+		pkstr = pkstr[0:-1]
+	    if cls.is_valid(pkstr):
+	        return cls(cls.complete_hex_str(pkstr))
+	    else:
+	        # Too long
+	        pass
+	else:
+	    return None
 
     @staticmethod
     def bytearray_to_base58(ba):

@@ -119,13 +119,13 @@ class btcrpc(object):
 	params = [account,confirmations,watchonly]
 	return self.jsonrpc('getbalance', params)
 
-    def importaddress(self, address, account='', restan=True):
+    def importaddress(self, address, account='', rescan=True):
 	'''
 	    The importaddress RPC adds an address or pubkey script to the wallet without the associated 
 	    private key, allowing you to watch for transactions affecting that address or pubkey 
 	    script without being able to spend any of its outputs.
 	'''
-	params = [address,account,restan]
+	params = [address,account,rescan]
 	return self.jsonrpc('importaddress', params)
 
     def importprivkey(self,privatekey,account='',rescan=True):
