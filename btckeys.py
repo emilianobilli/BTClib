@@ -17,6 +17,13 @@ MIN = 0x1
 #------------------------------------------------------------------------
 B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
+class btckeysException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+
 class btckeys(object):
     def __init__(self, pk=None):
 	if pk is not None:
@@ -24,15 +31,17 @@ class btckeys(object):
 		if len(pk) < 64:
 		    self.private_key = self.__class__.complete_hex_str(pk)
 		else:
-		    if self.__class__.is_valid(pk):
-			self.private_key = pk
-		    else:
-			# Too long
-			pass
+		    raise btckeysException('Hex private key string is to long')
+		if self.__class__.is_valid(pk):
+		    self.private_key = pk
+		else:
+		    raise btckeysException('Invalid private key value')
 	    else:
-		pass
-
-	self.public_key  = None
+		raise btckeysException('Expect str and % is pased' % type(pk).__name__)
+	    self.get_public_key()
+	else:
+	    self.private_key = None
+	    self.public_key  = None
     
     @staticmethod
     def complete_hex_str(pk):
@@ -53,9 +62,9 @@ class btckeys(object):
 	        return cls(cls.complete_hex_str(pkstr))
 	    else:
 	        # Too long
-	        pass
+	        raise btckeysException('Argument int or long is Invalid')
 	else:
-	    return None
+	    raise btckeysException('Invalid datatype, expect int or long')
 
     @staticmethod
     def bytearray_to_base58(ba):
@@ -80,7 +89,7 @@ class btckeys(object):
     @staticmethod
     def is_valid(privkey):
 	int_pk = int(privkey,base=16)
-	if int_pk <= MAX and int_pk >= MIN:
+	if int_pk < MAX and int_pk >= MIN:
 	    return True
 	else:
 	    return False
