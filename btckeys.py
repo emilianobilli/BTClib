@@ -30,7 +30,7 @@ class btckeys(object):
 	    if type(pk).__name__ == 'str':
 		if len(pk) < 64:
 		    self.private_key = self.__class__.complete_hex_str(pk)
-		else:
+		elif len(pk) > 64:
 		    raise btckeysException('Hex private key string is to long')
 		if self.__class__.is_valid(pk):
 		    self.private_key = pk
@@ -38,6 +38,7 @@ class btckeys(object):
 		    raise btckeysException('Invalid private key value')
 	    else:
 		raise btckeysException('Expect str and % is pased' % type(pk).__name__)
+	    self.public_key  = None
 	    self.get_public_key()
 	else:
 	    self.private_key = None
@@ -98,7 +99,7 @@ class btckeys(object):
     def from_random(cls):
         valid = False
 	while not valid:
-	    pk = hexlify(urandom(32))
+	    pk = sha256(urandom(64)).hexdigest()
 	    valid = cls.is_valid(pk)
 	return cls(pk)
 
