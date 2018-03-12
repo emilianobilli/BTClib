@@ -1,5 +1,6 @@
 from hashlib  import sha256
 from hashlib  import new as hashn
+from sha3     import keccak_256
 from ecdsa    import SigningKey
 from ecdsa    import SECP256k1
 from binascii import hexlify
@@ -130,6 +131,18 @@ class btckeys(object):
 	if self.private_key is not None and self.public_key is None:
 	    self.public_key = hexlify(SigningKey.from_secret_exponent(int(self.private_key,base=16),SECP256k1).get_verifying_key().to_string())
 
+
+    def to_rsk_addr(self):
+        if self.private_key is not None:
+            if self.public_key is None:
+		self.get_public_key()
+            k   = keccak_256(bytearray.fromhex(self.public_key))
+            return '0x%s' % k.hexdigest()[24:]
+        return ''
+
+    def to_eth_addr(self):
+        return self.to_rsk_addr()
+
     def to_addr(self):
 	if self.private_key is not None:
 	    # Genera la public key
@@ -151,7 +164,8 @@ class btckeys(object):
 if __name__ == '__main__':
     pk = btckeys.from_random()
     print pk.private_key
+    print pk.public_key
     print pk.to_wif()
     print pk.to_addr()
-
+    print pk.to_rsk_addr()
 
