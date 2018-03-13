@@ -161,11 +161,19 @@ class btckeys(object):
 	    return self.__class__.bytearray_to_base58(tmp)
 	return ''
 
+    def to_cwif(self):
+        if self.private_key is not None:
+            tmp = b'\x80' + bytearray.fromhex(self.private_key) + b'\x01'
+            tmp = tmp + bytearray(sha256(sha256(tmp).digest()).digest()[0:4])
+            return self.__class__.bytearray_to_base58(tmp)
+        return ''
+
 if __name__ == '__main__':
     pk = btckeys.from_random()
-    print pk.private_key
-    print pk.public_key
-    print pk.to_wif()
-    print pk.to_addr()
-    print pk.to_rsk_addr()
+    print 'Private Key -> ' + pk.private_key
+    print 'Public Key  -> ' + pk.public_key
+    print 'WIF         -> ' + pk.to_wif()
+    print 'cWIF        -> ' + pk.to_cwif()
+    print 'addr        -> ' + pk.to_addr()
+    print 'eth addr    -> ' + pk.to_rsk_addr()
 
