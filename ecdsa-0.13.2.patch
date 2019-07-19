@@ -1,0 +1,50 @@
+diff -Naur ecdsa/ecdsa.py ecdsa-eth/ecdsa.py
+--- ecdsa/ecdsa.py	2019-07-18 18:48:13.562253952 +0000
++++ ecdsa-eth/ecdsa.py	2019-07-11 20:23:59.925276520 +0000
+@@ -63,10 +63,10 @@
+ class Signature( object ):
+   """ECDSA signature.
+   """
+-  def __init__( self, r, s ):
++  def __init__( self, r, s, v ):
+     self.r = r
+     self.s = s
+-
++    self.v = v
+ 
+ 
+ class Public_key( object ):
+@@ -144,11 +144,12 @@
+     k = random_k % n
+     p1 = k * G
+     r = p1.x()
++
+     if r == 0: raise RuntimeError("amazingly unlucky random number r")
+     s = ( numbertheory.inverse_mod( k, n ) * \
+           ( hash + ( self.secret_multiplier * r ) % n ) ) % n
+     if s == 0: raise RuntimeError("amazingly unlucky random number s")
+-    return Signature( r, s )
++    return Signature( r, s, 28 if p1.y()%2 == 1 else 27 )
+ 
+ 
+ 
+diff -Naur ecdsa/keys.py ecdsa-eth/keys.py
+--- ecdsa/keys.py	2019-07-18 18:48:13.562253952 +0000
++++ ecdsa-eth/keys.py	2019-07-11 20:21:37.841647358 +0000
+@@ -260,8 +260,8 @@
+                                  "for your digest (%d)" % (self.curve.name,
+                                                            8*len(digest)))
+         number = string_to_number(digest)
+-        r, s = self.sign_number(number, entropy, k)
+-        return sigencode(r, s, self.privkey.order)
++        r, s, v = self.sign_number(number, entropy, k)
++        return sigencode(r, s, self.privkey.order),v
+ 
+     def sign_number(self, number, entropy=None, k=None):
+         # returns a pair of numbers
+@@ -280,4 +280,4 @@
+ 
+         assert 1 <= _k < order
+         sig = self.privkey.sign(number, _k)
+-        return sig.r, sig.s
++        return sig.r, sig.s, sig.v
